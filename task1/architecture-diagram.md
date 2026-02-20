@@ -5,13 +5,13 @@ flowchart LR
   Dev[Developer] -->|git push| Repo[GitHub Repo]
   Repo --> CI[CI/CD: GitHub Actions]
 
-  subgraph AWS[AWS Account / Region]
-    subgraph VPC[VPC]
-      subgraph Public[Public Subnets (2 AZs)]
+  subgraph AWS["AWS Account / Region"]
+    subgraph VPC["VPC"]
+      subgraph Public["Public Subnets - 2 AZs"]
         ALB[Application Load Balancer]
-        NAT[NAT Gateways (2)]
+        NAT[NAT Gateways]
       end
-      subgraph Private[Private Subnets (2 AZs)]
+      subgraph Private["Private Subnets - 2 AZs"]
         ASG[EC2 Auto Scaling Group]
         CW[CloudWatch Logs/Alarms]
         SSM[SSM Parameter Store]
