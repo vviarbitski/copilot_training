@@ -1,5 +1,5 @@
-bucket         = "replace-me-staging-tf-state"
+bucket         = "copilotbucket"
 key            = "staging/terraform.tfstate"
-region         = "eu-west-1"
-dynamodb_table = "replace-me-tf-locks"
+region         = "eu-north-1"
+dynamodb_table = "terraform-state-lock"
 encrypt        = true
