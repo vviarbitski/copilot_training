@@ -3,14 +3,15 @@ name: Terraform Homework
 on:
   pull_request:
     paths:
-      - "copilot_training/homework/terraform/**"
-      - "copilot_training/.github/workflows/terraform-homework.yml"
+      - "homework/terraform/**"
+      - ".github/workflows/terraform-homework.yml"
   push:
     branches:
+      - master
       - main
     paths:
-      - "copilot_training/homework/terraform/**"
-      - "copilot_training/.github/workflows/terraform-homework.yml"
+      - "homework/terraform/**"
+      - ".github/workflows/terraform-homework.yml"
   workflow_dispatch: {}
 
 permissions:
