@@ -1,37 +1,48 @@
-# Task 2 CI/CD Pipeline (Phase 3)
+# CI/CD Pipeline (Phase 3)
 
 This document describes the GitHub Actions pipeline for Terraform plan/apply.
 
-## Workflow
+## Workflow Status
+✅ **Workflow file configured and committed**: `.github/workflows/terraform-homework.yml`  
+⏸️ **Pipeline execution**: Waiting for GitHub secrets configuration (see Required GitHub Secrets below)
+
+**Recent workflow runs**: [View Actions](https://github.com/vviarbitski/copilot_training/actions)
+
+## Workflow Configuration
 - File: `.github/workflows/terraform-homework.yml`
 - Triggers:
-  - Pull requests that touch `copilot_training/homework/terraform/**`
-  - Pushes to `main` that touch `copilot_training/homework/terraform/**`
+  - Pull requests that touch `homework/terraform/**`
+  - Pushes to `master` or `main` that touch `homework/terraform/**`
   - Manual `workflow_dispatch`
 
 ## Jobs
-1) Plan (dev/staging/prod)
-- Initializes Terraform with the S3/DynamoDB backend.
-- Runs `terraform fmt -check -recursive`.
-- Runs `terraform validate`.
-- Runs tfsec scan over `copilot_training/homework/terraform`.
-- Creates a plan and uploads it as an artifact.
+1) **Plan** (dev/staging/prod in parallel)
+   - Initializes Terraform with the S3/DynamoDB backend
+   - Runs `terraform fmt -check -recursive`
+   - Runs `terraform validate`
+   - Creates a plan and uploads it as an artifact
 
-2) Apply (dev/staging/prod)
-- Runs on push to `main` only.
-- Downloads the plan artifact and applies it.
-- Optional Slack notification if `SLACK_WEBHOOK_URL` is set.
+2) **Apply** (dev/staging/prod in parallel)
+   - Runs on push to `master`/`main` only
+   - Downloads the plan artifact and applies it
+   - Optional Slack notification if `SLACK_WEBHOOK_URL` is set
 
 ## Required GitHub Secrets
-- `AWS_ROLE_ARN` (OIDC role to assume)
-- `AWS_REGION` (region for Terraform and backend)
-- `TF_LOCK_TABLE` (DynamoDB lock table name)
-- `TF_STATE_BUCKET_DEV`
-- `TF_STATE_BUCKET_STAGING`
-- `TF_STATE_BUCKET_PROD`
 
-Optional:
-- `SLACK_WEBHOOK_URL` for notifications
+**To enable pipeline execution**, configure these secrets in GitHub repository settings (`Settings > Secrets and variables > Actions`):
+
+**Required**:
+- `AWS_ROLE_ARN` - OIDC role ARN to assume for AWS access (e.g., `arn:aws:iam::123456789012:role/GitHubActionsRole`)
+- `AWS_REGION` - AWS region for Terraform and backend (e.g., `us-east-1`)
+- `TF_LOCK_TABLE` - DynamoDB table name for state locking (e.g., `terraform-locks`)
+- `TF_STATE_BUCKET_DEV` - S3 bucket for dev environment state
+- `TF_STATE_BUCKET_STAGING` - S3 bucket for staging environment state
+- `TF_STATE_BUCKET_PROD` - S3 bucket for prod environment state
+
+**Optional**:
+- `SLACK_WEBHOOK_URL` - Webhook URL for Slack notifications on apply completion
+
+**Note**: Without these secrets configured, the workflow will fail at the "Configure AWS credentials" step.
 
 ## Notes
 - Backend configuration is generated at runtime with secrets to avoid hardcoding.
