@@ -1,7 +1,7 @@
 data "archive_file" "lambda" {
   type        = "zip"
   source_file = "${path.module}/lambda/scale_asg.py"
-  output_path = "${abspath(path.module)}/.terraform/tmp/scale_asg.zip"
+  output_path = "${path.module}/scale_asg.zip"
 }
 
 # EventBridge schedules invoke a small Lambda to set ASG desired capacity.
