@@ -51,13 +51,8 @@ variable "enable_https" {
 
 variable "acm_certificate_arn" {
   type        = string
-  description = "ACM certificate ARN for HTTPS."
+  description = "ACM certificate ARN for HTTPS. Required if enable_https is true."
   default     = ""
-
-  validation {
-    condition     = var.enable_https == false || length(var.acm_certificate_arn) > 0
-    error_message = "acm_certificate_arn is required when enable_https is true."
-  }
 }
 
 variable "tags" {

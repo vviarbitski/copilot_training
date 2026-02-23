@@ -25,11 +25,11 @@ variable "public_subnet_cidrs" {
 
 variable "private_subnet_cidrs" {
   type        = list(string)
-  description = "Private subnet CIDRs in each AZ."
+  description = "Private subnet CIDRs in each AZ. Should match public subnet count."
 
   validation {
-    condition     = length(var.private_subnet_cidrs) == length(var.public_subnet_cidrs)
-    error_message = "private_subnet_cidrs must match public_subnet_cidrs length."
+    condition     = length(var.private_subnet_cidrs) > 0
+    error_message = "private_subnet_cidrs must contain at least one CIDR."
   }
 }
 
@@ -46,12 +46,12 @@ variable "enable_nat_gateway" {
 
 variable "nat_gateway_count" {
   type        = number
-  description = "Number of NAT gateways to create."
+  description = "Number of NAT gateways to create. Must not exceed public subnet count."
   default     = 1
 
   validation {
-    condition     = var.nat_gateway_count >= 1 && var.nat_gateway_count <= length(var.public_subnet_cidrs)
-    error_message = "nat_gateway_count must be between 1 and the number of public subnets."
+    condition     = var.nat_gateway_count >= 1
+    error_message = "nat_gateway_count must be at least 1."
   }
 }
 

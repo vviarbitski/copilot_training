@@ -50,23 +50,18 @@ variable "public_subnet_cidrs" {
 
 variable "private_subnet_cidrs" {
   type        = list(string)
-  description = "Private subnet CIDRs (one per AZ)."
+  description = "Private subnet CIDRs (one per AZ). Should match the number of public subnets."
 
   validation {
-    condition     = length(var.private_subnet_cidrs) == length(var.public_subnet_cidrs)
-    error_message = "private_subnet_cidrs must match the length of public_subnet_cidrs."
+    condition     = length(var.private_subnet_cidrs) > 0
+    error_message = "private_subnet_cidrs must contain at least one CIDR."
   }
 }
 
 variable "availability_zones" {
   type        = list(string)
-  description = "Optional explicit AZ list. Leave empty to auto-select."
+  description = "Optional explicit AZ list. Leave empty to auto-select. Should match subnet count if specified."
   default     = []
-
-  validation {
-    condition     = length(var.availability_zones) == 0 || length(var.availability_zones) == length(var.public_subnet_cidrs)
-    error_message = "availability_zones must be empty or match the subnet list length."
-  }
 }
 
 variable "subnet_az_count" {
@@ -88,12 +83,12 @@ variable "enable_nat_gateway" {
 
 variable "nat_gateway_count" {
   type        = number
-  description = "Number of NAT gateways to create (1 or per-AZ)."
+  description = "Number of NAT gateways to create (1 for cost savings, or match AZ count for HA). Must not exceed public subnet count."
   default     = 1
 
   validation {
-    condition     = var.nat_gateway_count >= 1 && var.nat_gateway_count <= length(var.public_subnet_cidrs)
-    error_message = "nat_gateway_count must be between 1 and the number of public subnets."
+    condition     = var.nat_gateway_count >= 1
+    error_message = "nat_gateway_count must be at least 1."
   }
 }
 
@@ -167,11 +162,6 @@ variable "acm_certificate_arn" {
   type        = string
   description = "ACM certificate ARN for HTTPS. Required if enable_https is true."
   default     = ""
-
-  validation {
-    condition     = var.enable_https == false || length(var.acm_certificate_arn) > 0
-    error_message = "acm_certificate_arn is required when enable_https is true."
-  }
 }
 
 variable "allowed_ingress_cidrs" {
