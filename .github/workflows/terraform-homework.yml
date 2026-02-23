@@ -1,0 +1,177 @@
+name: Terraform Homework
+
+on:
+  pull_request:
+    paths:
+      - "copilot_training/homework/terraform/**"
+      - "copilot_training/.github/workflows/terraform-homework.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "copilot_training/homework/terraform/**"
+      - "copilot_training/.github/workflows/terraform-homework.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  plan:
+    name: Plan (${{ matrix.env }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [dev, staging, prod]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select backend settings
+        shell: bash
+        run: |
+          case "${{ matrix.env }}" in
+            dev)
+              echo "TF_STATE_BUCKET=${{ secrets.TF_STATE_BUCKET_DEV }}" >> $GITHUB_ENV
+              ;;
+            staging)
+              echo "TF_STATE_BUCKET=${{ secrets.TF_STATE_BUCKET_STAGING }}" >> $GITHUB_ENV
+              ;;
+            prod)
+              echo "TF_STATE_BUCKET=${{ secrets.TF_STATE_BUCKET_PROD }}" >> $GITHUB_ENV
+              ;;
+          esac
+          echo "TF_LOCK_TABLE=${{ secrets.TF_LOCK_TABLE }}" >> $GITHUB_ENV
+          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Write backend config
+        shell: bash
+        working-directory: copilot_training/homework/terraform/environments/${{ matrix.env }}
+        run: |
+          cat > backend.hcl <<EOF
+          bucket         = "${TF_STATE_BUCKET}"
+          key            = "${{ matrix.env }}/terraform.tfstate"
+          region         = "${AWS_REGION}"
+          dynamodb_table = "${TF_LOCK_TABLE}"
+          encrypt        = true
+          EOF
+
+      - name: Terraform init
+        working-directory: copilot_training/homework/terraform/environments/${{ matrix.env }}
+        run: terraform init -backend-config=backend.hcl
+
+      - name: Terraform fmt
+        working-directory: copilot_training/homework/terraform/environments/${{ matrix.env }}
+        run: terraform fmt -check -recursive
+
+      - name: Terraform validate
+        working-directory: copilot_training/homework/terraform/environments/${{ matrix.env }}
+        run: terraform validate
+
+      - name: tfsec scan (optional)
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: copilot_training/homework/terraform
+
+      - name: Terraform plan
+        working-directory: copilot_training/homework/terraform/environments/${{ matrix.env }}
+        run: terraform plan -var-file=terraform.tfvars -out=plan.out
+
+      - name: Upload plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: plan-${{ matrix.env }}
+          path: copilot_training/homework/terraform/environments/${{ matrix.env }}/plan.out
+
+  apply:
+    name: Apply (${{ matrix.env }})
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    needs: plan
+    strategy:
+      matrix:
+        env: [dev, staging, prod]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select backend settings
+        shell: bash
+        run: |
+          case "${{ matrix.env }}" in
+            dev)
+              echo "TF_STATE_BUCKET=${{ secrets.TF_STATE_BUCKET_DEV }}" >> $GITHUB_ENV
+              ;;
+            staging)
+              echo "TF_STATE_BUCKET=${{ secrets.TF_STATE_BUCKET_STAGING }}" >> $GITHUB_ENV
+              ;;
+            prod)
+              echo "TF_STATE_BUCKET=${{ secrets.TF_STATE_BUCKET_PROD }}" >> $GITHUB_ENV
+              ;;
+          esac
+          echo "TF_LOCK_TABLE=${{ secrets.TF_LOCK_TABLE }}" >> $GITHUB_ENV
+          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Download plan
+        uses: actions/download-artifact@v4
+        with:
+          name: plan-${{ matrix.env }}
+          path: copilot_training/homework/terraform/environments/${{ matrix.env }}
+
+      - name: Write backend config
+        shell: bash
+        working-directory: copilot_training/homework/terraform/environments/${{ matrix.env }}
+        run: |
+          cat > backend.hcl <<EOF
+          bucket         = "${TF_STATE_BUCKET}"
+          key            = "${{ matrix.env }}/terraform.tfstate"
+          region         = "${AWS_REGION}"
+          dynamodb_table = "${TF_LOCK_TABLE}"
+          encrypt        = true
+          EOF
+
+      - name: Terraform init
+        working-directory: copilot_training/homework/terraform/environments/${{ matrix.env }}
+        run: terraform init -backend-config=backend.hcl
+
+      - name: Terraform apply
+        working-directory: copilot_training/homework/terraform/environments/${{ matrix.env }}
+        run: terraform apply -auto-approve plan.out
+
+      - name: Slack notification (optional)
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        shell: bash
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            exit 0
+          fi
+          status="${{ job.status }}"
+          payload=$(printf '{"text":"Terraform apply (%s) finished with status: %s. Commit: %s"}' "${{ matrix.env }}" "$status" "${{ github.sha }}")
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"

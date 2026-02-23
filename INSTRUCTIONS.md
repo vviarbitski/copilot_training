@@ -76,6 +76,16 @@ General guidelines for working with AI to design cloud architecture. Read these 
 ### Terraform
 - Include provider config, account/region parameters, tagging standards, and state backend (S3 + DynamoDB lock).
 
+## Terraform Best Practices (apply to all .tf work)
+
+- Use modules to avoid duplication; keep root modules thin and focus on composition.
+- Define variables with types, descriptions, and validation; set sane defaults where safe.
+- Add outputs only when needed by callers; verify referenced attributes exist.
+- Use data sources for dynamic values (AMI lookup, account/region metadata).
+- Enforce least-privilege IAM policies and explicit resource tags.
+- Add brief comments for non-obvious design decisions or tradeoffs.
+- Run `terraform fmt -recursive` after any .tf changes and `terraform validate` when feasible.
+
 ## Learning Progression
 
 This file is designed as a **reference and foundation** for all architecture design work. Use this progression approach:
