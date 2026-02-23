@@ -69,7 +69,7 @@ resource "aws_lambda_function" "main" {
   role          = aws_iam_role.lambda.arn
   handler       = "scale_asg.handler"
   runtime       = "python3.11"
-  filename      = data.archive_file.lambda.output_path
+  filename      = abspath(data.archive_file.lambda.output_path)
 
   source_code_hash = data.archive_file.lambda.output_base64sha256
 
