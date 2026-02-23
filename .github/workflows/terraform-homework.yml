@@ -47,6 +47,20 @@ jobs:
           echo "TF_LOCK_TABLE=${{ secrets.TF_LOCK_TABLE }}" >> $GITHUB_ENV
           echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
 
+      - name: Check required secrets
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.AWS_ROLE_ARN }}" ] || [ -z "${{ secrets.AWS_REGION }}" ] || [ -z "${TF_STATE_BUCKET}" ]; then
+            echo "::error::Required GitHub secrets are not configured."
+            echo "::error::Please configure the following secrets in repository Settings > Secrets and variables > Actions:"
+            echo "::error::  - AWS_ROLE_ARN"
+            echo "::error::  - AWS_REGION"
+            echo "::error::  - TF_LOCK_TABLE"
+            echo "::error::  - TF_STATE_BUCKET_DEV, TF_STATE_BUCKET_STAGING, TF_STATE_BUCKET_PROD"
+            echo "::error::See homework/PIPELINE.md for detailed setup instructions."
+            exit 1
+          fi
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -121,6 +135,16 @@ jobs:
           esac
           echo "TF_LOCK_TABLE=${{ secrets.TF_LOCK_TABLE }}" >> $GITHUB_ENV
           echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
+
+      - name: Check required secrets
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.AWS_ROLE_ARN }}" ] || [ -z "${{ secrets.AWS_REGION }}" ] || [ -z "${TF_STATE_BUCKET}" ]; then
+            echo "::error::Required GitHub secrets are not configured."
+            echo "::error::Please configure secrets in repository Settings > Secrets and variables > Actions"
+            echo "::error::See homework/PIPELINE.md for detailed setup instructions."
+            exit 1
+          fi
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
