@@ -15,9 +15,9 @@ instance_type = "t3.micro"
 ami_id        = ""
 user_data     = "#!/bin/bash\nset -e\nyum update -y\nyum install -y python3\ncd /home/ec2-user\npython3 -m http.server 8080 &\n"
 
-asg_min_size         = 1
+asg_min_size         = 0
 asg_max_size         = 3
-asg_desired_capacity = 1
+asg_desired_capacity = 0
 
 alb_listener_port     = 80
 alb_target_port       = 8080
