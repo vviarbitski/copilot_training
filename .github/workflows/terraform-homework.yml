@@ -35,24 +35,24 @@ jobs:
         run: |
           case "${{ matrix.env }}" in
             dev)
-              echo "TF_STATE_BUCKET=${{ secrets.TF_STATE_BUCKET_DEV }}" >> $GITHUB_ENV
+              echo "TF_STATE_BUCKET=${{ vars.TF_STATE_BUCKET_DEV }}" >> $GITHUB_ENV
               ;;
             staging)
-              echo "TF_STATE_BUCKET=${{ secrets.TF_STATE_BUCKET_STAGING }}" >> $GITHUB_ENV
+              echo "TF_STATE_BUCKET=${{ vars.TF_STATE_BUCKET_STAGING }}" >> $GITHUB_ENV
               ;;
             prod)
-              echo "TF_STATE_BUCKET=${{ secrets.TF_STATE_BUCKET_PROD }}" >> $GITHUB_ENV
+              echo "TF_STATE_BUCKET=${{ vars.TF_STATE_BUCKET_PROD }}" >> $GITHUB_ENV
               ;;
           esac
-          echo "TF_LOCK_TABLE=${{ secrets.TF_LOCK_TABLE }}" >> $GITHUB_ENV
-          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
+          echo "TF_LOCK_TABLE=${{ vars.TF_LOCK_TABLE }}" >> $GITHUB_ENV
+          echo "AWS_REGION=${{ vars.AWS_REGION }}" >> $GITHUB_ENV
 
-      - name: Check required secrets
+      - name: Check required variables
         shell: bash
         run: |
-          if [ -z "${{ secrets.AWS_ROLE_ARN }}" ] || [ -z "${{ secrets.AWS_REGION }}" ] || [ -z "${TF_STATE_BUCKET}" ]; then
-            echo "::error::Required GitHub secrets are not configured."
-            echo "::error::Please configure the following secrets in repository Settings > Secrets and variables > Actions:"
+          if [ -z "${{ vars.AWS_ROLE_ARN }}" ] || [ -z "${{ vars.AWS_REGION }}" ] || [ -z "${TF_STATE_BUCKET}" ]; then
+            echo "::error::Required GitHub variables are not configured."
+            echo "::error::Please configure the following variables in repository Settings > Secrets and variables > Actions > Variables:"
             echo "::error::  - AWS_ROLE_ARN"
             echo "::error::  - AWS_REGION"
             echo "::error::  - TF_LOCK_TABLE"
@@ -64,7 +64,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Terraform
@@ -124,24 +124,24 @@ jobs:
         run: |
           case "${{ matrix.env }}" in
             dev)
-              echo "TF_STATE_BUCKET=${{ secrets.TF_STATE_BUCKET_DEV }}" >> $GITHUB_ENV
+              echo "TF_STATE_BUCKET=${{ vars.TF_STATE_BUCKET_DEV }}" >> $GITHUB_ENV
               ;;
             staging)
-              echo "TF_STATE_BUCKET=${{ secrets.TF_STATE_BUCKET_STAGING }}" >> $GITHUB_ENV
+              echo "TF_STATE_BUCKET=${{ vars.TF_STATE_BUCKET_STAGING }}" >> $GITHUB_ENV
               ;;
             prod)
-              echo "TF_STATE_BUCKET=${{ secrets.TF_STATE_BUCKET_PROD }}" >> $GITHUB_ENV
+              echo "TF_STATE_BUCKET=${{ vars.TF_STATE_BUCKET_PROD }}" >> $GITHUB_ENV
               ;;
           esac
-          echo "TF_LOCK_TABLE=${{ secrets.TF_LOCK_TABLE }}" >> $GITHUB_ENV
-          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
+          echo "TF_LOCK_TABLE=${{ vars.TF_LOCK_TABLE }}" >> $GITHUB_ENV
+          echo "AWS_REGION=${{ vars.AWS_REGION }}" >> $GITHUB_ENV
 
-      - name: Check required secrets
+      - name: Check required variables
         shell: bash
         run: |
-          if [ -z "${{ secrets.AWS_ROLE_ARN }}" ] || [ -z "${{ secrets.AWS_REGION }}" ] || [ -z "${TF_STATE_BUCKET}" ]; then
-            echo "::error::Required GitHub secrets are not configured."
-            echo "::error::Please configure secrets in repository Settings > Secrets and variables > Actions"
+          if [ -z "${{ vars.AWS_ROLE_ARN }}" ] || [ -z "${{ vars.AWS_REGION }}" ] || [ -z "${TF_STATE_BUCKET}" ]; then
+            echo "::error::Required GitHub variables are not configured."
+            echo "::error::Please configure variables in repository Settings > Secrets and variables > Actions > Variables"
             echo "::error::See homework/PIPELINE.md for detailed setup instructions."
             exit 1
           fi
@@ -149,7 +149,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Terraform
