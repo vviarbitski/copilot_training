@@ -98,7 +98,7 @@ jobs:
 
       - name: Terraform plan
         working-directory: homework/terraform/environments/${{ matrix.env }}
-        run: terraform plan -var-file=terraform.tfvars -out=plan.out
+        run: terraform plan -var-file=terraform.tfvars -lock-timeout=5m -out=plan.out
 
       - name: Upload plan
         uses: actions/upload-artifact@v4
