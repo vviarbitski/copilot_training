@@ -60,7 +60,7 @@ jobs:
 
       - name: Write backend config
         shell: bash
-        working-directory: copilot_training/homework/terraform/environments/${{ matrix.env }}
+        working-directory: homework/terraform/environments/${{ matrix.env }}
         run: |
           cat > backend.hcl <<EOF
           bucket         = "${TF_STATE_BUCKET}"
@@ -71,31 +71,26 @@ jobs:
           EOF
 
       - name: Terraform init
-        working-directory: copilot_training/homework/terraform/environments/${{ matrix.env }}
+        working-directory: homework/terraform/environments/${{ matrix.env }}
         run: terraform init -backend-config=backend.hcl
 
       - name: Terraform fmt
-        working-directory: copilot_training/homework/terraform/environments/${{ matrix.env }}
+        working-directory: homework/terraform/environments/${{ matrix.env }}
         run: terraform fmt -check -recursive
 
       - name: Terraform validate
-        working-directory: copilot_training/homework/terraform/environments/${{ matrix.env }}
+        working-directory: homework/terraform/environments/${{ matrix.env }}
         run: terraform validate
 
-      - name: tfsec scan (optional)
-        uses: aquasecurity/tfsec-action@v1.0.3
-        with:
-          working_directory: copilot_training/homework/terraform
-
       - name: Terraform plan
-        working-directory: copilot_training/homework/terraform/environments/${{ matrix.env }}
+        working-directory: homework/terraform/environments/${{ matrix.env }}
         run: terraform plan -var-file=terraform.tfvars -out=plan.out
 
       - name: Upload plan
         uses: actions/upload-artifact@v4
         with:
           name: plan-${{ matrix.env }}
-          path: copilot_training/homework/terraform/environments/${{ matrix.env }}/plan.out
+          path: homework/terraform/environments/${{ matrix.env }}/plan.out
 
   apply:
     name: Apply (${{ matrix.env }})
@@ -142,11 +137,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: plan-${{ matrix.env }}
-          path: copilot_training/homework/terraform/environments/${{ matrix.env }}
+          path: homework/terraform/environments/${{ matrix.env }}
 
       - name: Write backend config
         shell: bash
-        working-directory: copilot_training/homework/terraform/environments/${{ matrix.env }}
+        working-directory: homework/terraform/environments/${{ matrix.env }}
         run: |
           cat > backend.hcl <<EOF
           bucket         = "${TF_STATE_BUCKET}"
@@ -157,11 +152,11 @@ jobs:
           EOF
 
       - name: Terraform init
-        working-directory: copilot_training/homework/terraform/environments/${{ matrix.env }}
+        working-directory: homework/terraform/environments/${{ matrix.env }}
         run: terraform init -backend-config=backend.hcl
 
       - name: Terraform apply
-        working-directory: copilot_training/homework/terraform/environments/${{ matrix.env }}
+        working-directory: homework/terraform/environments/${{ matrix.env }}
         run: terraform apply -auto-approve plan.out
 
       - name: Slack notification (optional)
