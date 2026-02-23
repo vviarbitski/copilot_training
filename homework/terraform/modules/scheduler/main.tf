@@ -4,6 +4,16 @@ data "archive_file" "lambda" {
   output_path = "${path.module}/scale_asg.zip"
 }
 
+resource "null_resource" "lambda_archive" {
+  triggers = {
+    source_hash = filemd5("${path.module}/lambda/scale_asg.py")
+  }
+
+  provisioner "local-exec" {
+    command = "cd ${path.module} && zip -j scale_asg.zip lambda/scale_asg.py || true"
+  }
+}
+
 # EventBridge schedules invoke a small Lambda to set ASG desired capacity.
 
 data "aws_iam_policy_document" "assume_lambda" {
@@ -69,11 +79,11 @@ resource "aws_lambda_function" "main" {
   role          = aws_iam_role.lambda.arn
   handler       = "scale_asg.handler"
   runtime       = "python3.11"
-  filename      = abspath(data.archive_file.lambda.output_path)
+  filename      = "${path.module}/scale_asg.zip"
 
-  source_code_hash = data.archive_file.lambda.output_base64sha256
+  source_code_hash = filebase64sha256("${path.module}/scale_asg.zip")
 
-  depends_on = [data.archive_file.lambda]
+  depends_on = [null_resource.lambda_archive]
 
   environment {
     variables = {
