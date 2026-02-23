@@ -9,7 +9,7 @@ availability_zones   = []
 subnet_az_count      = 2
 
 enable_nat_gateway = true
-nat_gateway_count  = 2
+nat_gateway_count  = 1
 
 instance_type = "t3.micro"
 ami_id        = ""
