@@ -81,7 +81,7 @@ resource "aws_lambda_function" "main" {
   runtime       = "python3.11"
   filename      = "${path.module}/scale_asg.zip"
 
-  source_code_hash = filebase64sha256("${path.module}/scale_asg.zip")
+  source_code_hash = base64sha256(file("${path.module}/lambda/scale_asg.py"))
 
   depends_on = [null_resource.lambda_archive]
 
