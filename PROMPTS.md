@@ -19,9 +19,9 @@ Tasks progress as follows:
 - **Task 1** (Complete): AWS staging environment design using AI conversation
   - Learn: How to apply INSTRUCTIONS.md guidelines in real scenarios
   - Output: Architecture diagram, tool selection doc, Terraform parameter list
-- **Task 2** (In Progress): Build detailed Terraform modules and CI/CD pipeline based on Task 1
-- **Task 3** (In Progress): Enhance with monitoring, logging, and cost optimization
-- **Task 4** (Pending): Multi-region failover and advanced HA patterns
+- **Task 2** (Complete): Generate modular Terraform based on Task 1
+- **Task 3** (Complete): CI/CD pipeline for Terraform plan/apply
+- **Task 4** (Complete): Code optimization, security hardening, and cost optimization
 
 Each task builds on the previous one. All task deliverables live in the single `homework` folder. When starting a task, review the prior task prompts to maintain context.
 
@@ -58,12 +58,16 @@ All phases (Task 1-4) use the same `copilot_training/homework` folder. Treat tas
 ## Task 3
 
 ### Main Prompt
-"Enhance Task 2 with monitoring, logging, and cost optimization. Update Terraform modules and provide documentation."
+"Generate a GitHub Actions pipeline for Terraform plan/apply with optional tfsec scanning and Slack notifications. Provide pipeline documentation."
 
 ### Notes
-- Track improvements in `copilot_training/homework/IMPROVEMENT_REPORT.md` and `copilot_training/homework/COST_REPORT.md`.
+- Workflow file: `.github/workflows/terraform-homework.yml`.
+- Pipeline documentation: `copilot_training/homework/PIPELINE.md`.
 
 ## Task 4
 
 ### Main Prompt
-"Design multi-region failover and advanced HA patterns for the Task 2 stack. Provide architecture diagram, tool selection, and Terraform parameter inventory."
+"Analyze and improve Terraform code quality, apply security hardening, and optimize costs. Provide an improvement report and a cost report."
+
+### Notes
+- Track improvements in `copilot_training/homework/IMPROVEMENT_REPORT.md` and `copilot_training/homework/COST_REPORT.md`.

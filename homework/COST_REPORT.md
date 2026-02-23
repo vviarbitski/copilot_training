@@ -1,4 +1,4 @@
-# Phase 4 Cost Report
+# Task 4 Cost Report
 
 ## Assumptions
 - Region: eu-west-1
@@ -20,7 +20,7 @@
 
 Estimated total: ~$159.7 per month
 
-## Savings From Phase 4 Improvements
+## Savings From Task 4 Improvements
 1) NAT gateway count default reduced from 2 to 1
 - Savings per environment: $0.045 \times 730 = 32.9$/month
 

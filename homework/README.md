@@ -1,6 +1,6 @@
-# Homework - Terraform Infrastructure (Phase 2+)
+# Homework - Terraform Infrastructure (Task 2+)
 
-This folder contains a complete Terraform codebase for the Task 1 architecture, with environment separation and a remote state backend, plus later phase improvements.
+This folder contains a complete Terraform codebase for the Task 1 architecture, with environment separation and a remote state backend, plus improvements from Tasks 3-4.
 
 ## Overview
 The Terraform layout is split into three layers:
